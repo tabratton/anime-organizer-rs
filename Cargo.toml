@@ -1,0 +1,16 @@
+[package]
+name = "anime-organizer-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anitomy = { git = "https://github.com/Rapptz/anitomy-rs.git", rev = "c5271be1d9fe71a49e93e98ac3f982b38e6e27b6" }
+anyhow = "1.0.100"
+lazy_static = "1.5.0"
+notify = "8.2.0"
+serde = { version = "1.0.228", features = ["derive"] }
+tokio = { version = "1.47.1", features = ["default", "fs", "rt-multi-thread", "rt", "macros", "sync", "time"] }
+toml = "0.9.5"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "fmt", "time"] }
+walkdir = "2.5.0"

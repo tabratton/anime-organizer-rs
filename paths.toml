@@ -1,0 +1,13 @@
+[[paths]]
+name = "test1"
+source = "/Users/tab/Downloads/test-source1"
+destination = "/Users/tab/Downloads/test-dest1"
+watcher_type = "Sync"
+place_in_sub = false
+
+[[paths]]
+name = "test2"
+source = "/Users/tab/Downloads/test-source2"
+destination = "/Users/tab/Downloads/test-dest2"
+watcher_type = "Copy"
+place_in_sub = true
