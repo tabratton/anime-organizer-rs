@@ -51,7 +51,6 @@ impl CopyWatcher {
     fn spawn_mover(&self, path: PathBuf) {
         info!("{} found, moving to correct folder", path.display());
         let mover = Mover::new(
-            self.0.source.clone(),
             self.0.destination.clone(),
             path,
             self.0.place_in_sub,
@@ -69,7 +68,6 @@ impl From<PathConfig> for CopyWatcher {
 }
 
 struct Mover {
-    source: PathBuf,
     destination: PathBuf,
     detected_file: PathBuf,
     subfolder: bool,
@@ -78,11 +76,10 @@ struct Mover {
 }
 
 impl Mover {
-    fn new(source: PathBuf, destination: PathBuf, detected_file: PathBuf, subfolder: bool) -> Self {
+    fn new(destination: PathBuf, detected_file: PathBuf, subfolder: bool) -> Self {
         let title = get_title(&detected_file);
         let wait_time = Duration::from_secs(5);
         Self {
-            source,
             destination,
             detected_file,
             subfolder,
