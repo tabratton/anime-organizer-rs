@@ -1,4 +1,4 @@
-use crate::PathConfig;
+use crate::{PathConfig, copy_file};
 use notify::{RecursiveMode, Watcher};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
@@ -33,7 +33,7 @@ impl SyncWatcher {
         watcher.watch(Path::new(&path), RecursiveMode::Recursive)?;
         while let Some(event) = rx.recv().await {
             match event.kind {
-                notify::EventKind::Create(_) => self.copy_file(event.paths),
+                notify::EventKind::Create(_) => self.copy_file(event.paths).await,
                 notify::EventKind::Remove(_) => self.delete_file(event.paths),
                 _ => unreachable!(),
             }
@@ -42,7 +42,7 @@ impl SyncWatcher {
         Ok(())
     }
 
-    fn copy_file(&self, paths: Vec<PathBuf>) {
+    async fn copy_file(&self, paths: Vec<PathBuf>) {
         for path in paths {
             let destination_name = self
                 .0
@@ -51,7 +51,7 @@ impl SyncWatcher {
             let file_name = path.file_name().unwrap();
             info!("Copying {file_name:?} to {destination_name:?}");
             std::fs::create_dir_all(destination_name.parent().unwrap()).unwrap();
-            match std::fs::copy(&path, destination_name) {
+            match copy_file(path.clone(), destination_name).await {
                 Ok(_) => info!("Copied {file_name:?}"),
                 Err(error) => error!(error = %error, "Error while copying {file_name:?}"),
             }

@@ -103,3 +103,7 @@ enum WatcherTypeConfig {
     // Watches source and copies files to dest
     Copy,
 }
+
+async fn copy_file(source: PathBuf, destination: PathBuf) -> std::io::Result<u64> {
+    tokio::task::spawn_blocking(move || std::fs::copy(source, destination)).await?
+}

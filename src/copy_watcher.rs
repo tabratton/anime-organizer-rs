@@ -1,4 +1,4 @@
-use crate::{DETECTED_FILES, MOVED_FILES, PathConfig};
+use crate::{DETECTED_FILES, MOVED_FILES, PathConfig, copy_file};
 use anitomy::ElementKind;
 use notify::{RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
@@ -50,11 +50,7 @@ impl CopyWatcher {
 
     fn spawn_mover(&self, path: PathBuf) {
         info!("{} found, moving to correct folder", path.display());
-        let mover = Mover::new(
-            self.0.destination.clone(),
-            path,
-            self.0.place_in_sub,
-        );
+        let mover = Mover::new(self.0.destination.clone(), path, self.0.place_in_sub);
         tokio::spawn(async move {
             mover.start().await;
         });
@@ -124,7 +120,7 @@ impl Mover {
             info!("Starting copy {}", self.detected_file.display());
 
             if self.detected_file.is_dir() {
-                if let Err(e) = copy_dir_all(&self.detected_file, &destination) {
+                if let Err(e) = copy_dir_all(&self.detected_file, &destination).await {
                     error!(
                         "Error copying {} to {}: {}",
                         self.detected_file.display(),
@@ -132,7 +128,8 @@ impl Mover {
                         e
                     );
                 }
-            } else if let Err(e) = std::fs::copy(&self.detected_file, &destination) {
+            } else if let Err(e) = copy_file(self.detected_file.clone(), destination.clone()).await
+            {
                 error!(
                     "Error copying {} to {}: {}",
                     self.detected_file.display(),
@@ -169,15 +166,19 @@ fn create_folder(folder: &Path) {
     }
 }
 
-fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
+async fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
     std::fs::create_dir_all(&dst)?;
     for entry in std::fs::read_dir(src)? {
         let entry = entry?;
         let ty = entry.file_type()?;
         if ty.is_dir() {
-            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+            Box::pin(copy_dir_all(
+                entry.path(),
+                dst.as_ref().join(entry.file_name()),
+            ))
+            .await?;
         } else {
-            std::fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+            copy_file(entry.path(), dst.as_ref().join(entry.file_name())).await?;
         }
     }
     Ok(())
