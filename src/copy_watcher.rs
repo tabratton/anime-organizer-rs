@@ -92,8 +92,9 @@ impl Mover {
     fn setup_destination_folder(&self) -> PathBuf {
         let mut destination = PathBuf::new();
 
-        if self.subfolder && self.title.is_some() {
-            let title = self.title.as_ref().unwrap();
+        if let Some(title) = &self.title
+            && self.subfolder
+        {
             let mut folder = PathBuf::from(&self.destination);
             folder.push(title);
             create_folder(&folder);
@@ -120,25 +121,26 @@ impl Mover {
             info!("Starting copy {}", self.detected_file.display());
 
             if self.detected_file.is_dir() {
-                if let Err(e) = copy_dir_all(&self.detected_file, &destination).await {
-                    error!(
+                match copy_dir_all(&self.detected_file, &destination).await {
+                    Ok(_) => file_moved = true,
+                    Err(e) => error!(
                         "Error copying {} to {}: {}",
                         self.detected_file.display(),
                         destination.display(),
                         e
-                    );
+                    ),
                 }
-            } else if let Err(e) = copy_file(self.detected_file.clone(), destination.clone()).await
-            {
-                error!(
-                    "Error copying {} to {}: {}",
-                    self.detected_file.display(),
-                    destination.display(),
-                    e
-                );
+            } else {
+                match copy_file(self.detected_file.clone(), destination.clone()).await {
+                    Ok(_) => file_moved = true,
+                    Err(e) => error!(
+                        "Error copying {} to {}: {}",
+                        self.detected_file.display(),
+                        destination.display(),
+                        e
+                    ),
+                }
             }
-
-            file_moved = true;
         }
 
         info!("{} moved successfully", self.detected_file.display());
