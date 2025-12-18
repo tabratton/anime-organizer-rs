@@ -14,7 +14,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.48.0", features = ["default", "fs", "rt-multi-thread", "rt", "macros", "sync", "time"] }
 toml = "0.9.8"
 tracing = "0.1.43"
-tracing-subscriber = { version = "0.3.20", features = ["env-filter", "fmt", "time"] }
+tracing-subscriber = { version = "0.3.22", features = ["env-filter", "fmt", "time"] }
 walkdir = "2.5.0"
 
 [profile.dev]
