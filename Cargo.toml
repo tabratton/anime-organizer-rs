@@ -11,7 +11,7 @@ anyhow = "1.0.102"
 lazy_static = "1.5.0"
 notify = "8.2.0"
 serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.50.0", features = ["default", "fs", "rt-multi-thread", "rt", "macros", "sync", "time"] }
+tokio = { version = "1.52.1", features = ["default", "fs", "rt-multi-thread", "rt", "macros", "sync", "time"] }
 toml = "1.1.0"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter", "fmt", "time"] }
